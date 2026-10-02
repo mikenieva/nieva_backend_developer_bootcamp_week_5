@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Catálogo</title>
+  </head>
+  <body>
+    <h1>Catálogo de la biblioteca</h1>
+    <button id="load">Cargar libros</button>
+    <p id="meta"></p>
+    <ul id="books"></ul>
+
+    <script>
+      const API = "http://127.0.0.1:8000/api/v1/books";
+
+      document.getElementById("load").addEventListener("click", async () => {
+        const meta = document.getElementById("meta");
+        const list = document.getElementById("books");
+        try {
+          const response = await fetch(API);
+          meta.textContent =
+            `status=${response.status} ` +
+            `request_id=${response.headers.get("X-Request-ID")} ` +
+            `tiempo=${response.headers.get("X-Process-Time")}`;
+          if (!response.ok) {
+            return;
+          }
+          const books = await response.json();
+          list.replaceChildren();
+          for (const book of books) {
+            const item = document.createElement("li");
+            item.textContent = `${book.title} (${book.publication.year})`;
+            list.append(item);
+          }
+        } catch (error) {
+          meta.textContent = `Falló: ${error}`;
+        }
+      });
+    </script>
+  </body>
+</html>
